@@ -27,8 +27,24 @@ async function callClaude(messages: Array<{ role: string; content: unknown }>): 
   });
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`API Error (${res.status}): ${err}`);
+    const errText = await res.text();
+    let message: string;
+    try {
+      const errJson = JSON.parse(errText);
+      const errMsg = errJson?.error?.message ?? '';
+      if (errMsg.includes('credit balance is too low')) {
+        message = 'APIクレジットが不足しています。console.anthropic.com でクレジットを購入してください。';
+      } else if (errMsg.includes('invalid x-api-key') || errMsg.includes('invalid api key')) {
+        message = 'APIキーが無効です。設定画面で正しいキーを入力してください。';
+      } else if (res.status === 429) {
+        message = 'リクエスト制限に達しました。しばらく待ってから再試行してください。';
+      } else {
+        message = errMsg || `APIエラーが発生しました (${res.status})`;
+      }
+    } catch {
+      message = `APIエラーが発生しました (${res.status})`;
+    }
+    throw new Error(message);
   }
 
   const data = await res.json();

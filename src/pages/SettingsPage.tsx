@@ -1,25 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useCurrentGoal, saveGoal } from '../hooks/useGoals';
 import { useSettings, saveSettings } from '../hooks/useSettings';
+import { calculateCalories } from '../lib/calories';
 import { format } from 'date-fns';
 import { db } from '../lib/db';
 
 export function SettingsPage() {
   const goal = useCurrentGoal();
   const settings = useSettings();
+  const initialized = useRef(false);
 
-  const [calories, setCalories] = useState(0);
-  const [protein, setProtein] = useState(0);
-  const [fat, setFat] = useState(0);
-  const [carbs, setCarbs] = useState(0);
+  const [protein, setProtein] = useState('');
+  const [fat, setFat] = useState('');
+  const [carbs, setCarbs] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [saved, setSaved] = useState(false);
 
+  const calories = calculateCalories(
+    Number(protein) || 0,
+    Number(fat) || 0,
+    Number(carbs) || 0,
+  );
+
   useEffect(() => {
-    setCalories(goal.calories);
-    setProtein(goal.protein);
-    setFat(goal.fat);
-    setCarbs(goal.carbs);
+    if (!initialized.current) {
+      setProtein(String(goal.protein));
+      setFat(String(goal.fat));
+      setCarbs(String(goal.carbs));
+      initialized.current = true;
+    }
   }, [goal]);
 
   useEffect(() => {
@@ -29,9 +38,9 @@ export function SettingsPage() {
   const handleSaveGoal = async () => {
     await saveGoal({
       calories,
-      protein,
-      fat,
-      carbs,
+      protein: Number(protein) || 0,
+      fat: Number(fat) || 0,
+      carbs: Number(carbs) || 0,
       effectiveFrom: format(new Date(), 'yyyy-MM-dd'),
     });
     setSaved(true);
@@ -89,25 +98,15 @@ export function SettingsPage() {
         <div className="bg-white rounded-2xl p-5 shadow-sm space-y-4">
           <h3 className="text-sm font-bold text-gray-700">1日の目標</h3>
 
-          <div>
-            <label className="block text-xs font-medium text-indigo-500 mb-1">カロリー (kcal)</label>
-            <input
-              type="number"
-              inputMode="numeric"
-              value={calories || ''}
-              onChange={(e) => setCalories(Number(e.target.value))}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            />
-          </div>
-
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-medium text-blue-500 mb-1">P (g)</label>
               <input
                 type="number"
-                inputMode="numeric"
-                value={protein || ''}
-                onChange={(e) => setProtein(Number(e.target.value))}
+                inputMode="decimal"
+                value={protein}
+                onChange={(e) => setProtein(e.target.value)}
+                placeholder="60"
                 className="w-full px-3 py-2.5 bg-gray-50 border border-blue-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-300"
               />
             </div>
@@ -115,9 +114,10 @@ export function SettingsPage() {
               <label className="block text-xs font-medium text-amber-500 mb-1">F (g)</label>
               <input
                 type="number"
-                inputMode="numeric"
-                value={fat || ''}
-                onChange={(e) => setFat(Number(e.target.value))}
+                inputMode="decimal"
+                value={fat}
+                onChange={(e) => setFat(e.target.value)}
+                placeholder="55"
                 className="w-full px-3 py-2.5 bg-gray-50 border border-amber-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-amber-300"
               />
             </div>
@@ -125,11 +125,19 @@ export function SettingsPage() {
               <label className="block text-xs font-medium text-green-500 mb-1">C (g)</label>
               <input
                 type="number"
-                inputMode="numeric"
-                value={carbs || ''}
-                onChange={(e) => setCarbs(Number(e.target.value))}
+                inputMode="decimal"
+                value={carbs}
+                onChange={(e) => setCarbs(e.target.value)}
+                placeholder="300"
                 className="w-full px-3 py-2.5 bg-gray-50 border border-green-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-green-300"
               />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-indigo-500 mb-1">カロリー (kcal) — PFCから自動計算</label>
+            <div className="w-full px-3 py-2.5 bg-indigo-50 border border-indigo-200 rounded-xl text-sm text-center font-semibold text-indigo-700">
+              {calories} kcal
             </div>
           </div>
 

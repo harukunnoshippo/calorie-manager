@@ -8,7 +8,7 @@ import { MealDetailPage } from './pages/MealDetailPage';
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="max-w-lg mx-auto min-h-svh flex flex-col bg-slate-50">
+      <div className="max-w-lg w-full mx-auto min-h-svh flex flex-col bg-slate-50 overflow-x-hidden">
         <Routes>
           <Route path="/" element={<DailyPage />} />
           <Route path="/calendar" element={<CalendarPage />} />

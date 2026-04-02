@@ -52,6 +52,16 @@ export interface NutritionResponse {
   notes?: string;
 }
 
+export interface FoodPreset {
+  id: string;
+  name: string;
+  calories: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+  createdAt: number;
+}
+
 export const MEAL_CATEGORY_LABELS: Record<MealCategory, string> = {
   breakfast: '朝食',
   lunch: '昼食',

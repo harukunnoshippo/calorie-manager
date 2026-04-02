@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import type { MealCategory, NutritionResponse } from '../../types';
+import type { MealCategory, NutritionResponse, FoodPreset } from '../../types';
 import { MEAL_CATEGORY_LABELS, MEAL_CATEGORIES } from '../../types';
 import { PFCEditor } from './PFCEditor';
 import { PhotoCapture } from './PhotoCapture';
 import { TextInput } from './TextInput';
+import { FoodList } from './FoodList';
 import { addMeal } from '../../hooks/useMeals';
 
 interface Props {
@@ -12,12 +13,12 @@ interface Props {
   onClose: () => void;
 }
 
-type InputTab = 'photo' | 'text' | 'manual';
+type InputTab = 'photo' | 'text' | 'manual' | 'list';
 type Step = 'input' | 'edit';
 
 export function AddMealSheet({ date, initialCategory, onClose }: Props) {
   const [category, setCategory] = useState<MealCategory>(initialCategory);
-  const [tab, setTab] = useState<InputTab>('photo');
+  const [tab, setTab] = useState<InputTab>('list');
   const [step, setStep] = useState<Step>('input');
   const [nutritionResult, setNutritionResult] = useState<NutritionResponse | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | undefined>();
@@ -39,13 +40,26 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
   const handleSave = async (values: { name: string; protein: number; fat: number; carbs: number; calories: number }) => {
     await addMeal(date, category, {
       ...values,
-      source: tab,
+      source: tab === 'list' ? 'manual' : tab,
       photoBlob,
     });
     onClose();
   };
 
+  const handlePresetSelect = async (preset: FoodPreset) => {
+    await addMeal(date, category, {
+      name: preset.name,
+      protein: preset.protein,
+      fat: preset.fat,
+      carbs: preset.carbs,
+      calories: preset.calories,
+      source: 'manual',
+    });
+    onClose();
+  };
+
   const tabs: { key: InputTab; label: string }[] = [
+    { key: 'list', label: 'リスト' },
     { key: 'photo', label: '写真' },
     { key: 'text', label: 'テキスト' },
     { key: 'manual', label: '手入力' },
@@ -95,6 +109,9 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
                 <div className="mb-4 p-3 bg-red-50 rounded-xl text-sm text-red-600">{error}</div>
               )}
 
+              {tab === 'list' && (
+                <FoodList onSelect={handlePresetSelect} />
+              )}
               {tab === 'photo' && (
                 <PhotoCapture onResult={handlePhotoResult} onError={setError} />
               )}

@@ -25,26 +25,31 @@ const confidenceLabels = {
 
 export function PFCEditor({ initial, confidence, notes, onSave, onCancel }: Props) {
   const [name, setName] = useState(initial?.name ?? '');
-  const [protein, setProtein] = useState(initial?.protein ?? 0);
-  const [fat, setFat] = useState(initial?.fat ?? 0);
-  const [carbs, setCarbs] = useState(initial?.carbs ?? 0);
-  const [calories, setCalories] = useState(initial?.calories ?? 0);
+  const [protein, setProtein] = useState(initial?.protein != null ? String(initial.protein) : '');
+  const [fat, setFat] = useState(initial?.fat != null ? String(initial.fat) : '');
+  const [carbs, setCarbs] = useState(initial?.carbs != null ? String(initial.carbs) : '');
+  const [caloriesStr, setCaloriesStr] = useState(initial?.calories != null ? String(initial.calories) : '');
   const [manualCalories, setManualCalories] = useState(false);
+
+  const proteinNum = Number(protein) || 0;
+  const fatNum = Number(fat) || 0;
+  const carbsNum = Number(carbs) || 0;
+  const calories = manualCalories ? (Number(caloriesStr) || 0) : calculateCalories(proteinNum, fatNum, carbsNum);
 
   useEffect(() => {
     if (!manualCalories) {
-      setCalories(calculateCalories(protein, fat, carbs));
+      setCaloriesStr(String(calculateCalories(proteinNum, fatNum, carbsNum)));
     }
-  }, [protein, fat, carbs, manualCalories]);
+  }, [proteinNum, fatNum, carbsNum, manualCalories]);
 
   useEffect(() => {
     if (initial) {
       setName(initial.name ?? '');
-      setProtein(initial.protein ?? 0);
-      setFat(initial.fat ?? 0);
-      setCarbs(initial.carbs ?? 0);
+      setProtein(initial.protein != null ? String(initial.protein) : '');
+      setFat(initial.fat != null ? String(initial.fat) : '');
+      setCarbs(initial.carbs != null ? String(initial.carbs) : '');
       if (initial.calories && initial.calories > 0) {
-        setCalories(initial.calories);
+        setCaloriesStr(String(initial.calories));
         setManualCalories(true);
       }
     }
@@ -52,7 +57,7 @@ export function PFCEditor({ initial, confidence, notes, onSave, onCancel }: Prop
 
   const handleSave = () => {
     if (!name.trim()) return;
-    onSave({ name: name.trim(), protein, fat, carbs, calories });
+    onSave({ name: name.trim(), protein: proteinNum, fat: fatNum, carbs: carbsNum, calories });
   };
 
   return (
@@ -83,8 +88,9 @@ export function PFCEditor({ initial, confidence, notes, onSave, onCancel }: Prop
           <input
             type="number"
             inputMode="decimal"
-            value={protein || ''}
-            onChange={(e) => setProtein(Number(e.target.value))}
+            step="0.1"
+            value={protein}
+            onChange={(e) => setProtein(e.target.value)}
             className="w-full px-3 py-2.5 bg-white border border-blue-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
         </div>
@@ -93,8 +99,9 @@ export function PFCEditor({ initial, confidence, notes, onSave, onCancel }: Prop
           <input
             type="number"
             inputMode="decimal"
-            value={fat || ''}
-            onChange={(e) => setFat(Number(e.target.value))}
+            step="0.1"
+            value={fat}
+            onChange={(e) => setFat(e.target.value)}
             className="w-full px-3 py-2.5 bg-white border border-amber-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-amber-300"
           />
         </div>
@@ -103,8 +110,9 @@ export function PFCEditor({ initial, confidence, notes, onSave, onCancel }: Prop
           <input
             type="number"
             inputMode="decimal"
-            value={carbs || ''}
-            onChange={(e) => setCarbs(Number(e.target.value))}
+            step="0.1"
+            value={carbs}
+            onChange={(e) => setCarbs(e.target.value)}
             className="w-full px-3 py-2.5 bg-white border border-green-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-green-300"
           />
         </div>
@@ -125,8 +133,9 @@ export function PFCEditor({ initial, confidence, notes, onSave, onCancel }: Prop
         <input
           type="number"
           inputMode="decimal"
-          value={calories || ''}
-          onChange={(e) => { setCalories(Number(e.target.value)); setManualCalories(true); }}
+          step="1"
+          value={caloriesStr}
+          onChange={(e) => { setCaloriesStr(e.target.value); setManualCalories(true); }}
           className="w-full px-3 py-2.5 bg-white border border-indigo-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-indigo-300"
         />
       </div>

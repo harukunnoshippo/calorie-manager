@@ -3,6 +3,7 @@ import type { MealCategory, NutritionResponse, FoodPreset } from '../../types';
 import { MEAL_CATEGORY_LABELS, MEAL_CATEGORIES } from '../../types';
 import { PFCEditor } from './PFCEditor';
 import { PhotoCapture } from './PhotoCapture';
+import type { PhotoResult } from './PhotoCapture';
 import { TextInput } from './TextInput';
 import { FoodList } from './FoodList';
 import { addMeal } from '../../hooks/useMeals';
@@ -14,7 +15,7 @@ interface Props {
 }
 
 type InputTab = 'photo' | 'text' | 'manual' | 'list';
-type Step = 'input' | 'edit';
+type Step = 'input' | 'edit' | 'photo-batch';
 
 export function AddMealSheet({ date, initialCategory, onClose }: Props) {
   const [category, setCategory] = useState<MealCategory>(initialCategory);
@@ -22,6 +23,7 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
   const [step, setStep] = useState<Step>('input');
   const [nutritionResult, setNutritionResult] = useState<NutritionResponse | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | undefined>();
+  const [batchPhotoResults, setBatchPhotoResults] = useState<PhotoResult[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const handlePhotoResult = (result: NutritionResponse, blob: Blob) => {
@@ -29,6 +31,27 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
     setPhotoBlob(blob);
     setStep('edit');
     setError(null);
+  };
+
+  const handlePhotoResults = (results: PhotoResult[]) => {
+    setBatchPhotoResults(results);
+    setStep('photo-batch');
+    setError(null);
+  };
+
+  const handleBatchPhotoSave = async () => {
+    for (const { result, blob } of batchPhotoResults) {
+      await addMeal(date, category, {
+        name: result.name,
+        protein: result.protein,
+        fat: result.fat,
+        carbs: result.carbs,
+        calories: result.calories,
+        source: 'photo',
+        photoBlob: blob,
+      });
+    }
+    onClose();
   };
 
   const handleTextResult = (result: NutritionResponse) => {
@@ -46,15 +69,17 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
     onClose();
   };
 
-  const handlePresetSelect = async (preset: FoodPreset) => {
-    await addMeal(date, category, {
-      name: preset.name,
-      protein: preset.protein,
-      fat: preset.fat,
-      carbs: preset.carbs,
-      calories: preset.calories,
-      source: 'manual',
-    });
+  const handlePresetSelect = async (presets: FoodPreset[]) => {
+    for (const preset of presets) {
+      await addMeal(date, category, {
+        name: preset.name,
+        protein: preset.protein,
+        fat: preset.fat,
+        carbs: preset.carbs,
+        calories: preset.calories,
+        source: 'manual',
+      });
+    }
     onClose();
   };
 
@@ -113,7 +138,7 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
                 <FoodList onSelect={handlePresetSelect} />
               )}
               {tab === 'photo' && (
-                <PhotoCapture onResult={handlePhotoResult} onError={setError} />
+                <PhotoCapture onResult={handlePhotoResult} onResults={handlePhotoResults} onError={setError} />
               )}
               {tab === 'text' && (
                 <TextInput onResult={handleTextResult} onError={setError} />
@@ -132,6 +157,39 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
               onSave={handleSave}
               onCancel={() => { setStep('input'); setNutritionResult(null); }}
             />
+          )}
+
+          {step === 'photo-batch' && batchPhotoResults.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-gray-700">
+                {batchPhotoResults.length}件の解析結果
+              </p>
+              {batchPhotoResults.map((item, i) => (
+                <div key={i} className="bg-white rounded-xl px-4 py-3 shadow-sm">
+                  <p className="text-sm font-medium text-gray-800">{item.result.name}</p>
+                  <div className="flex gap-3 mt-1 text-xs">
+                    <span className="text-blue-500">P {item.result.protein.toFixed(1)}g</span>
+                    <span className="text-amber-500">F {item.result.fat.toFixed(1)}g</span>
+                    <span className="text-green-500">C {item.result.carbs.toFixed(1)}g</span>
+                    <span className="text-indigo-500">{item.result.calories} kcal</span>
+                  </div>
+                </div>
+              ))}
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => { setStep('input'); setBatchPhotoResults([]); }}
+                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-500"
+                >
+                  戻る
+                </button>
+                <button
+                  onClick={handleBatchPhotoSave}
+                  className="flex-1 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-medium"
+                >
+                  まとめて保存（{batchPhotoResults.length}件）
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>

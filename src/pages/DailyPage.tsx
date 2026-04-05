@@ -8,7 +8,7 @@ import { AddMealSheet } from '../components/meals/AddMealSheet';
 import { useMealsByDate, deleteMeal } from '../hooks/useMeals';
 import { useCurrentGoal } from '../hooks/useGoals';
 import { useDailySummary } from '../hooks/useDailySummary';
-import { MEAL_CATEGORIES } from '../types';
+import { MEAL_CATEGORIES, DEFAULT_GOAL } from '../types';
 import type { MealCategory } from '../types';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,7 +19,8 @@ export function DailyPage() {
   const navigate = useNavigate();
 
   const meals = useMealsByDate(date);
-  const goal = useCurrentGoal();
+  const savedGoal = useCurrentGoal();
+  const goal = savedGoal ?? { id: 'default', effectiveFrom: '2000-01-01', ...DEFAULT_GOAL };
   const summary = useDailySummary(meals, goal);
 
   const displayDate = format(new Date(date), 'M月d日 (E)', { locale: ja });
@@ -81,6 +82,7 @@ export function DailyPage() {
             goalCarbs={goal.carbs}
           />
         </div>
+
       </div>
 
       {/* Meal Sections */}

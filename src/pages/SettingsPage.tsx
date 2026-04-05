@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useCurrentGoal, saveGoal } from '../hooks/useGoals';
 import { useSettings, saveSettings } from '../hooks/useSettings';
 import { calculateCalories } from '../lib/calories';
@@ -8,13 +8,13 @@ import { db } from '../lib/db';
 export function SettingsPage() {
   const goal = useCurrentGoal();
   const settings = useSettings();
-  const initialized = useRef(false);
 
   const [protein, setProtein] = useState('');
   const [fat, setFat] = useState('');
   const [carbs, setCarbs] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [saved, setSaved] = useState(false);
+  const [goalLoaded, setGoalLoaded] = useState(false);
 
   const calories = calculateCalories(
     Number(protein) || 0,
@@ -22,14 +22,16 @@ export function SettingsPage() {
     Number(carbs) || 0,
   );
 
+  // goal is undefined while DB is loading, then either a DailyGoal or undefined (no saved goal)
+  // useLiveQuery returns undefined during loading, then the actual result
   useEffect(() => {
-    if (!initialized.current) {
+    if (!goalLoaded && goal !== undefined) {
       setProtein(String(goal.protein));
       setFat(String(goal.fat));
       setCarbs(String(goal.carbs));
-      initialized.current = true;
+      setGoalLoaded(true);
     }
-  }, [goal]);
+  }, [goal, goalLoaded]);
 
   useEffect(() => {
     if (settings?.claudeApiKey) setApiKey(settings.claudeApiKey);

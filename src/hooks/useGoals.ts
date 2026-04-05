@@ -1,11 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../lib/db';
 import type { DailyGoal } from '../types';
-import { DEFAULT_GOAL } from '../types';
 
-export function useCurrentGoal(): DailyGoal {
-  const goal = useLiveQuery(() => db.goals.orderBy('effectiveFrom').reverse().first());
-  return goal ?? { id: 'default', effectiveFrom: '2000-01-01', ...DEFAULT_GOAL };
+export function useCurrentGoal(): DailyGoal | undefined {
+  return useLiveQuery(() => db.goals.orderBy('effectiveFrom').reverse().first());
 }
 
 export async function saveGoal(goal: Omit<DailyGoal, 'id'>): Promise<void> {

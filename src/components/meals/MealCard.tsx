@@ -20,7 +20,7 @@ export function MealCard({ meal, onEdit, onDelete }: Props) {
       <div className="flex items-center gap-2 ml-3 shrink-0">
         <span className="text-sm font-semibold text-indigo-600">{meal.calories} kcal</span>
         <button
-          onClick={(e) => { e.stopPropagation(); onDelete(meal.id); }}
+          onClick={(e) => { e.stopPropagation(); if (window.confirm('本当に削除しますか？')) onDelete(meal.id); }}
           className="text-gray-400 hover:text-red-500 p-1"
           aria-label="削除"
         >

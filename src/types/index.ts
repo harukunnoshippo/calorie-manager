@@ -52,6 +52,12 @@ export interface NutritionResponse {
   notes?: string;
 }
 
+export interface WeightGoal {
+  id: 'weight-goal';
+  targetKg: number;
+  startDate: string;
+}
+
 export interface FoodPreset {
   id: string;
   name: string;

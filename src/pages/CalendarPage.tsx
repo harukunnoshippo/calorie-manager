@@ -4,15 +4,17 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOf
 import { ja } from 'date-fns/locale';
 import { db } from '../lib/db';
 import { useCurrentGoal } from '../hooks/useGoals';
-import { useFatReduction } from '../hooks/useFatReduction';
 import { DEFAULT_GOAL } from '../types';
 import { useNavigate } from 'react-router-dom';
+import { EncouragementCard } from '../components/calendar/EncouragementCard';
+import { FatProgressCard } from '../components/calendar/FatProgressCard';
+import { CalorieChart } from '../components/calendar/CalorieChart';
+import { BadgesCard } from '../components/calendar/BadgesCard';
 
 export function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const navigate = useNavigate();
   const goal = useCurrentGoal() ?? { id: 'default', effectiveFrom: '2000-01-01', ...DEFAULT_GOAL };
-  const fatReduction = useFatReduction();
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -134,26 +136,10 @@ export function CalendarPage() {
           </div>
         </div>
 
-        {/* Fat Reduction Simulation */}
-        {fatReduction.daysTracked > 0 && (
-          <div className="mt-4 bg-white rounded-2xl p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-sm font-bold text-gray-700">体脂肪減少シミュレーション</span>
-              <span className="text-xs text-gray-400">（昨日まで）</span>
-            </div>
-            <div className="flex items-baseline gap-1 mb-2">
-              <span className={`text-3xl font-bold ${fatReduction.fatKg >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                {fatReduction.fatKg >= 0 ? '-' : '+'}{Math.abs(fatReduction.fatKg).toFixed(2)}
-              </span>
-              <span className="text-sm text-gray-500">kg</span>
-            </div>
-            <div className="flex gap-4 text-xs text-gray-400">
-              <span>累積{fatReduction.cumulativeDeficit >= 0 ? '赤字' : '黒字'}: {Math.abs(fatReduction.cumulativeDeficit).toLocaleString()} kcal</span>
-              <span>記録日数: {fatReduction.daysTracked}日</span>
-            </div>
-            <p className="text-[10px] text-gray-300 mt-2">基礎代謝 2,500 kcal / 体脂肪1kg = 7,200 kcal で計算</p>
-          </div>
-        )}
+        <EncouragementCard />
+        <FatProgressCard />
+        <CalorieChart />
+        <BadgesCard />
       </div>
     </div>
   );

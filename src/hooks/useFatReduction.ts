@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../lib/db';
 import { format, subDays } from 'date-fns';
 
-const BMR = 1633;
+const BMR = 2500;
 const KCAL_PER_KG_FAT = 7200;
 
 export function useFatReduction() {

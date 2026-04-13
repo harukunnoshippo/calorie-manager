@@ -77,6 +77,18 @@ export const MEAL_CATEGORY_LABELS: Record<MealCategory, string> = {
 
 export const MEAL_CATEGORIES: MealCategory[] = ['breakfast', 'lunch', 'dinner', 'snack'];
 
+export interface BackupData {
+  version: 2;
+  exportedAt: string;
+  data: {
+    meals: Omit<MealEntry, 'photoBlob'>[];
+    goals: DailyGoal[];
+    settings: AppSettings[];
+    presets: FoodPreset[];
+    weightGoals: WeightGoal[];
+  };
+}
+
 export const DEFAULT_GOAL: Omit<DailyGoal, 'id' | 'effectiveFrom'> = {
   calories: 2000,
   protein: 60,

@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMeal, updateMeal, deleteMeal } from '../hooks/useMeals';
+import { addPreset } from '../hooks/usePresets';
 import { PFCEditor } from '../components/meals/PFCEditor';
 import { MEAL_CATEGORY_LABELS } from '../types';
 
@@ -7,6 +9,7 @@ export function MealDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const meal = useMeal(id);
+  const [addedToList, setAddedToList] = useState(false);
 
   if (!meal) {
     return (
@@ -24,6 +27,18 @@ export function MealDetailPage() {
   const handleDelete = async () => {
     await deleteMeal(meal.id);
     navigate(-1);
+  };
+
+  const handleAddToList = async () => {
+    await addPreset({
+      name: meal.name,
+      calories: meal.calories,
+      protein: meal.protein,
+      fat: meal.fat,
+      carbs: meal.carbs,
+    });
+    setAddedToList(true);
+    setTimeout(() => setAddedToList(false), 2500);
   };
 
   return (
@@ -68,6 +83,18 @@ export function MealDetailPage() {
           onSave={handleSave}
           onCancel={() => navigate(-1)}
         />
+
+        <button
+          onClick={handleAddToList}
+          disabled={addedToList}
+          className={`mt-4 w-full py-3 rounded-xl border text-sm font-medium transition ${
+            addedToList
+              ? 'border-emerald-300 text-emerald-600 bg-emerald-50'
+              : 'border-gray-200 text-gray-600 active:bg-gray-100'
+          }`}
+        >
+          {addedToList ? '✓ リストに追加しました' : '+ リストに追加する'}
+        </button>
       </div>
     </div>
   );

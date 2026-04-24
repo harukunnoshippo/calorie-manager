@@ -1,36 +1,19 @@
 import { useState } from 'react';
 import { usePresets, addPreset, deletePreset } from '../../hooks/usePresets';
 import { calculateCalories } from '../../lib/calories';
-import type { FoodPreset } from '../../types';
 
 interface Props {
-  onSelect: (presets: FoodPreset[]) => void;
+  selectedIds: Set<string>;
+  onToggle: (id: string) => void;
 }
 
-export function FoodList({ onSelect }: Props) {
+export function FoodList({ selectedIds, onToggle }: Props) {
   const presets = usePresets();
   const [showAdd, setShowAdd] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [name, setName] = useState('');
   const [protein, setProtein] = useState('');
   const [fat, setFat] = useState('');
   const [carbs, setCarbs] = useState('');
-
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const handleBatchAdd = () => {
-    const selected = presets.filter((p) => selectedIds.has(p.id));
-    if (selected.length > 0) {
-      onSelect(selected);
-    }
-  };
 
   const handleAdd = async () => {
     if (!name.trim()) return;
@@ -64,7 +47,7 @@ export function FoodList({ onSelect }: Props) {
         return (
           <div key={preset.id} className="flex items-center bg-white rounded-xl px-4 py-3 shadow-sm">
             <button
-              onClick={() => toggleSelect(preset.id)}
+              onClick={() => onToggle(preset.id)}
               className={`w-5 h-5 rounded border-2 mr-3 shrink-0 flex items-center justify-center transition ${
                 checked ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300'
               }`}
@@ -76,7 +59,7 @@ export function FoodList({ onSelect }: Props) {
               )}
             </button>
             <button
-              onClick={() => toggleSelect(preset.id)}
+              onClick={() => onToggle(preset.id)}
               className="flex-1 min-w-0 text-left"
             >
               <p className="text-sm font-medium text-gray-800 truncate">{preset.name}</p>
@@ -99,15 +82,6 @@ export function FoodList({ onSelect }: Props) {
           </div>
         );
       })}
-
-      {selectedIds.size > 0 && (
-        <button
-          onClick={handleBatchAdd}
-          className="w-full py-3 rounded-xl bg-indigo-500 text-white text-sm font-medium active:bg-indigo-600"
-        >
-          まとめて追加（{selectedIds.size}件）
-        </button>
-      )}
 
       {showAdd ? (
         <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">

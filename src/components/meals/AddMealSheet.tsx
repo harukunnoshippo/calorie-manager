@@ -7,6 +7,7 @@ import type { PhotoResult } from './PhotoCapture';
 import { TextInput } from './TextInput';
 import { FoodList } from './FoodList';
 import { addMeal } from '../../hooks/useMeals';
+import { usePresets } from '../../hooks/usePresets';
 
 interface Props {
   date: string;
@@ -25,6 +26,8 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
   const [photoBlob, setPhotoBlob] = useState<Blob | undefined>();
   const [batchPhotoResults, setBatchPhotoResults] = useState<PhotoResult[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [listSelectedIds, setListSelectedIds] = useState<Set<string>>(new Set());
+  const allPresets = usePresets();
 
   const handlePhotoResult = (result: NutritionResponse, blob: Blob) => {
     setNutritionResult(result);
@@ -69,6 +72,15 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
     onClose();
   };
 
+  const handleListToggle = (id: string) => {
+    setListSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const handlePresetSelect = async (presets: FoodPreset[]) => {
     for (const preset of presets) {
       await addMeal(date, category, {
@@ -93,8 +105,9 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-gray-50 rounded-t-2xl max-h-[90vh] overflow-y-auto animate-slide-up">
-        <div className="sticky top-0 bg-gray-50 z-10 px-5 pt-4 pb-3 border-b border-gray-200">
+      <div className="relative bg-gray-50 rounded-t-2xl max-h-[90vh] flex flex-col animate-slide-up">
+        {/* Header */}
+        <div className="shrink-0 bg-gray-50 px-5 pt-4 pb-3 border-b border-gray-200">
           <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3" />
           <h2 className="text-lg font-bold text-gray-800 text-center">食事を追加</h2>
 
@@ -113,7 +126,8 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
           </div>
         </div>
 
-        <div className="px-5 py-4">
+        {/* Scrollable content */}
+        <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4">
           {step === 'input' && (
             <>
               <div className="flex gap-1 bg-gray-200 rounded-lg p-1 mb-4">
@@ -135,7 +149,10 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
               )}
 
               {tab === 'list' && (
-                <FoodList onSelect={handlePresetSelect} />
+                <FoodList
+                  selectedIds={listSelectedIds}
+                  onToggle={handleListToggle}
+                />
               )}
               {tab === 'photo' && (
                 <PhotoCapture onResult={handlePhotoResult} onResults={handlePhotoResults} onError={setError} />
@@ -192,6 +209,20 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
             </div>
           )}
         </div>
+
+        {/* Sticky footer: "まとめて追加" button for list tab */}
+        {step === 'input' && tab === 'list' && listSelectedIds.size > 0 && (
+          <div className="shrink-0 px-5 pb-6 pt-3 bg-gray-50 border-t border-gray-200">
+            <button
+              onClick={() => handlePresetSelect(
+                allPresets.filter((p) => listSelectedIds.has(p.id))
+              )}
+              className="w-full py-3 rounded-xl bg-indigo-500 text-white text-sm font-medium active:bg-indigo-600"
+            >
+              まとめて追加（{listSelectedIds.size}件）
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

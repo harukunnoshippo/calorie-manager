@@ -19,15 +19,23 @@ const categoryIcons: Record<MealCategory, string> = {
 
 export function MealSection({ category, meals, onAdd, onEdit, onDelete }: Props) {
   const totalCal = meals.reduce((s, m) => s + m.calories, 0);
+  const totalProtein = meals.reduce((s, m) => s + m.protein, 0);
+  const totalFat = meals.reduce((s, m) => s + m.fat, 0);
+  const totalCarbs = meals.reduce((s, m) => s + m.carbs, 0);
 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span>{categoryIcons[category]}</span>
           <h3 className="text-sm font-semibold text-gray-700">{MEAL_CATEGORY_LABELS[category]}</h3>
           {meals.length > 0 && (
-            <span className="text-xs text-gray-400">{totalCal} kcal</span>
+            <>
+              <span className="text-xs text-gray-400">{totalCal} kcal</span>
+              <span className="text-xs text-blue-400">P {Math.round(totalProtein)}g</span>
+              <span className="text-xs text-amber-400">F {Math.round(totalFat)}g</span>
+              <span className="text-xs text-green-400">C {Math.round(totalCarbs)}g</span>
+            </>
           )}
         </div>
         <button

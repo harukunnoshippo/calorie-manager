@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../lib/db';
 import { format, subDays } from 'date-fns';
 
-const BMR = 2500;
+const TDEE = 2000;
 const KCAL_PER_KG_FAT = 7200;
 
 export function useFatReduction() {
@@ -28,7 +28,7 @@ export function useFatReduction() {
     // Calculate cumulative deficit
     let cumulativeDeficit = 0;
     for (const [, calories] of dailyCalories) {
-      cumulativeDeficit += BMR - calories;
+      cumulativeDeficit += TDEE - calories;
     }
 
     return {

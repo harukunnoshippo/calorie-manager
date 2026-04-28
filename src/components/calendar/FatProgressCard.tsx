@@ -71,7 +71,7 @@ export function FatProgressCard() {
             <span>累積{fatReduction.cumulativeDeficit >= 0 ? '赤字' : '黒字'}: {Math.abs(fatReduction.cumulativeDeficit).toLocaleString()} kcal</span>
             <span>記録日数: {fatReduction.daysTracked}日</span>
           </div>
-          <p className="text-[10px] text-gray-300 mt-2">基礎代謝 2,500 kcal / 体脂肪1kg = 7,200 kcal で計算</p>
+          <p className="text-[10px] text-gray-300 mt-2">TDEE 2,000 kcal / 体脂肪1kg = 7,200 kcal で計算</p>
         </>
       ) : (
         <div className="py-3 text-center">

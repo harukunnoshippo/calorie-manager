@@ -5,7 +5,7 @@ import { useCurrentGoal } from './useGoals';
 import { DEFAULT_GOAL } from '../types';
 import type { BadgeStats } from '../lib/badges';
 
-const BMR = 2500;
+const TDEE = 2000;
 const KCAL_PER_KG_FAT = 7200;
 
 const EMPTY: BadgeStats = {
@@ -64,7 +64,7 @@ export function useBadgeStats(): BadgeStats {
     // Cumulative fat reduction
     let cumulativeDeficit = 0;
     for (const cal of dailyCalories.values()) {
-      cumulativeDeficit += BMR - cal;
+      cumulativeDeficit += TDEE - cal;
     }
     const fatKgReduced = cumulativeDeficit / KCAL_PER_KG_FAT;
 

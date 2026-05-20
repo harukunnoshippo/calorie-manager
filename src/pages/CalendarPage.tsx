@@ -43,8 +43,8 @@ export function CalendarPage() {
     const total = dailyTotals.get(dateStr);
     if (total === undefined) return 'bg-gray-100';
     const ratio = total / goal.calories;
-    if (ratio <= 1.0) return 'bg-green-300';
-    if (ratio <= 1.15) return 'bg-yellow-300';
+    if (ratio <= 1.15) return 'bg-green-300';
+    if (ratio <= 1.30) return 'bg-yellow-300';
     return 'bg-red-300';
   };
 

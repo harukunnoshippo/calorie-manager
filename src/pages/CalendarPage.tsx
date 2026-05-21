@@ -130,7 +130,7 @@ export function CalendarPage() {
             <div>
               <p className="text-xs text-gray-400">目標達成日</p>
               <p className="text-lg font-bold text-green-600">
-                {[...dailyTotals.values()].filter((v) => v <= goal.calories).length}
+                {[...dailyTotals.values()].filter((v) => v <= goal.calories * 1.15).length}
               </p>
             </div>
           </div>

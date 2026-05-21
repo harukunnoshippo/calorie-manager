@@ -37,7 +37,7 @@ export function useBadgeStats(): BadgeStats {
     // Goal achieved days
     let goalAchievedDays = 0;
     for (const cal of dailyCalories.values()) {
-      if (cal <= goalCalories) goalAchievedDays += 1;
+      if (cal <= goalCalories * 1.15) goalAchievedDays += 1;
     }
 
     // Longest streak

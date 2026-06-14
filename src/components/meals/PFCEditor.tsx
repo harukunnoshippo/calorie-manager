@@ -28,19 +28,10 @@ export function PFCEditor({ initial, confidence, notes, onSave, onCancel }: Prop
   const [protein, setProtein] = useState(initial?.protein != null ? String(initial.protein) : '');
   const [fat, setFat] = useState(initial?.fat != null ? String(initial.fat) : '');
   const [carbs, setCarbs] = useState(initial?.carbs != null ? String(initial.carbs) : '');
-  const [caloriesStr, setCaloriesStr] = useState(initial?.calories != null ? String(initial.calories) : '');
-  const [manualCalories, setManualCalories] = useState(false);
-
   const proteinNum = Number(protein) || 0;
   const fatNum = Number(fat) || 0;
   const carbsNum = Number(carbs) || 0;
-  const calories = manualCalories ? (Number(caloriesStr) || 0) : calculateCalories(proteinNum, fatNum, carbsNum);
-
-  useEffect(() => {
-    if (!manualCalories) {
-      setCaloriesStr(String(calculateCalories(proteinNum, fatNum, carbsNum)));
-    }
-  }, [proteinNum, fatNum, carbsNum, manualCalories]);
+  const calories = calculateCalories(proteinNum, fatNum, carbsNum);
 
   useEffect(() => {
     if (initial) {
@@ -48,10 +39,6 @@ export function PFCEditor({ initial, confidence, notes, onSave, onCancel }: Prop
       setProtein(initial.protein != null ? String(initial.protein) : '');
       setFat(initial.fat != null ? String(initial.fat) : '');
       setCarbs(initial.carbs != null ? String(initial.carbs) : '');
-      if (initial.calories && initial.calories > 0) {
-        setCaloriesStr(String(initial.calories));
-        setManualCalories(true);
-      }
     }
   }, [initial]);
 
@@ -119,25 +106,10 @@ export function PFCEditor({ initial, confidence, notes, onSave, onCancel }: Prop
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-indigo-500 mb-1">
-          カロリー (kcal)
-          {manualCalories && (
-            <button
-              onClick={() => setManualCalories(false)}
-              className="ml-2 text-gray-400 underline"
-            >
-              自動計算に戻す
-            </button>
-          )}
-        </label>
-        <input
-          type="number"
-          inputMode="decimal"
-          step="1"
-          value={caloriesStr}
-          onChange={(e) => { setCaloriesStr(e.target.value); setManualCalories(true); }}
-          className="w-full px-3 py-2.5 bg-white border border-indigo-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-indigo-300"
-        />
+        <label className="block text-xs font-medium text-indigo-500 mb-1">カロリー (kcal) — PFCから自動計算</label>
+        <div className="w-full px-3 py-2.5 bg-indigo-50 border border-indigo-200 rounded-xl text-sm text-center font-semibold text-indigo-700">
+          {calories}
+        </div>
       </div>
 
       <div className="flex gap-3 pt-2">

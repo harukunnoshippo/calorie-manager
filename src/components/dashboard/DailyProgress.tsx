@@ -1,4 +1,4 @@
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell } from 'recharts';
 
 interface Props {
   consumed: number;
@@ -19,25 +19,24 @@ export function DailyProgress({ consumed, goal }: Props) {
 
   return (
     <div className="relative flex items-center justify-center">
-      <ResponsiveContainer width={180} height={180}>
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={80}
-            startAngle={90}
-            endAngle={-270}
-            dataKey="value"
-            stroke="none"
-          >
-            {data.map((_, i) => (
-              <Cell key={i} fill={colors[i]} />
-            ))}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
+      <PieChart width={180} height={180}>
+        <Pie
+          data={data}
+          cx="50%"
+          cy="50%"
+          innerRadius={60}
+          outerRadius={80}
+          startAngle={90}
+          endAngle={-270}
+          dataKey="value"
+          stroke="none"
+          isAnimationActive={false}
+        >
+          {data.map((_, i) => (
+            <Cell key={i} fill={colors[i]} />
+          ))}
+        </Pie>
+      </PieChart>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-3xl font-bold text-gray-800">{consumed}</span>
         <span className="text-xs text-gray-500">/ {goal} kcal</span>

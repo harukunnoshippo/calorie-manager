@@ -21,12 +21,12 @@ export function MealDetailPage() {
 
   const handleSave = async (values: { name: string; protein: number; fat: number; carbs: number; calories: number }) => {
     await updateMeal(meal.id, values);
-    navigate(-1);
+    navigate(`/?date=${meal.date}`);
   };
 
   const handleDelete = async () => {
     await deleteMeal(meal.id);
-    navigate(-1);
+    navigate(`/?date=${meal.date}`);
   };
 
   const handleAddToList = async () => {

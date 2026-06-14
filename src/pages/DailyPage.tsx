@@ -10,10 +10,11 @@ import { useCurrentGoal } from '../hooks/useGoals';
 import { useDailySummary } from '../hooks/useDailySummary';
 import { MEAL_CATEGORIES, DEFAULT_GOAL } from '../types';
 import type { MealCategory } from '../types';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export function DailyPage() {
-  const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [searchParams] = useSearchParams();
+  const [date, setDate] = useState(searchParams.get('date') ?? format(new Date(), 'yyyy-MM-dd'));
   const [showSheet, setShowSheet] = useState(false);
   const [sheetCategory, setSheetCategory] = useState<MealCategory>('breakfast');
   const navigate = useNavigate();

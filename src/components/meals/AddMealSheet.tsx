@@ -7,7 +7,7 @@ import type { PhotoResult } from './PhotoCapture';
 import { TextInput } from './TextInput';
 import { FoodList } from './FoodList';
 import { addMeal } from '../../hooks/useMeals';
-import { usePresets } from '../../hooks/usePresets';
+import { usePresets, incrementPresetUsage } from '../../hooks/usePresets';
 
 interface Props {
   date: string;
@@ -91,6 +91,7 @@ export function AddMealSheet({ date, initialCategory, onClose }: Props) {
         calories: preset.calories,
         source: 'manual',
       });
+      await incrementPresetUsage(preset.id);
     }
     onClose();
   };

@@ -66,6 +66,7 @@ export interface FoodPreset {
   fat: number;
   carbs: number;
   createdAt: number;
+  usageCount?: number;
 }
 
 export const MEAL_CATEGORY_LABELS: Record<MealCategory, string> = {

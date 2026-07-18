@@ -22,6 +22,15 @@ const tabs = [
     ),
   },
   {
+    path: '/weight',
+    label: '体重',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+        <path fillRule="evenodd" d="M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6zm4.5 4.5a.75.75 0 000 1.5h3.75v3.75a.75.75 0 001.5 0V12H16.5a.75.75 0 000-1.5H12.75V6.75a.75.75 0 00-1.5 0V10.5H7.5z" clipRule="evenodd" />
+      </svg>
+    ),
+  },
+  {
     path: '/settings',
     label: '設定',
     icon: (

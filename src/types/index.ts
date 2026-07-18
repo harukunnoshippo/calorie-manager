@@ -58,6 +58,11 @@ export interface WeightGoal {
   startDate: string;
 }
 
+export interface WeightLog {
+  date: string; // YYYY-MM-DD (primary key)
+  weight: number; // kg
+}
+
 export interface FoodPreset {
   id: string;
   name: string;

@@ -4,6 +4,7 @@ import { DailyPage } from './pages/DailyPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { MealDetailPage } from './pages/MealDetailPage';
+import { WeightPage } from './pages/WeightPage';
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<DailyPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/weight" element={<WeightPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/meal/:id" element={<MealDetailPage />} />
         </Routes>

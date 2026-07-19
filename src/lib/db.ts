@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { MealEntry, DailyGoal, AppSettings, FoodPreset, WeightGoal, WeightLog } from '../types';
+import type { MealEntry, DailyGoal, AppSettings, FoodPreset, WeightGoal, WeightLog, TrainingDay } from '../types';
 
 const db = new Dexie('CalorieManager') as Dexie & {
   meals: EntityTable<MealEntry, 'id'>;
@@ -8,6 +8,7 @@ const db = new Dexie('CalorieManager') as Dexie & {
   presets: EntityTable<FoodPreset, 'id'>;
   weightGoals: EntityTable<WeightGoal, 'id'>;
   weightLogs: EntityTable<WeightLog, 'date'>;
+  trainingDays: EntityTable<TrainingDay, 'date'>;
 };
 
 db.version(1).stores({
@@ -38,6 +39,16 @@ db.version(4).stores({
   presets: 'id, name, createdAt',
   weightGoals: 'id',
   weightLogs: 'date',
+});
+
+db.version(5).stores({
+  meals: 'id, date, category, createdAt',
+  goals: 'id, effectiveFrom',
+  settings: 'id',
+  presets: 'id, name, createdAt',
+  weightGoals: 'id',
+  weightLogs: 'date',
+  trainingDays: 'date',
 });
 
 export { db };

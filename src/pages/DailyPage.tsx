@@ -6,7 +6,8 @@ import { PFCBars } from '../components/dashboard/PFCBars';
 import { MealSection } from '../components/meals/MealSection';
 import { AddMealSheet } from '../components/meals/AddMealSheet';
 import { useMealsByDate, deleteMeal } from '../hooks/useMeals';
-import { useCurrentGoal } from '../hooks/useGoals';
+import { useGoalForDate } from '../hooks/useGoals';
+import { useIsTrainingDay, toggleTrainingDay } from '../hooks/useTrainingDays';
 import { useDailySummary } from '../hooks/useDailySummary';
 import { MEAL_CATEGORIES, DEFAULT_GOAL } from '../types';
 import type { MealCategory } from '../types';
@@ -20,7 +21,8 @@ export function DailyPage() {
   const navigate = useNavigate();
 
   const meals = useMealsByDate(date);
-  const savedGoal = useCurrentGoal();
+  const savedGoal = useGoalForDate(date);
+  const isTraining = useIsTrainingDay(date);
   const goal = savedGoal ?? { id: 'default', effectiveFrom: '2000-01-01', ...DEFAULT_GOAL };
   const summary = useDailySummary(meals, goal);
 
@@ -42,7 +44,7 @@ export function DailyPage() {
   return (
     <div className="flex-1 pb-20">
       {/* Date Navigation */}
-      <div className="flex items-center justify-between px-5 py-3 bg-white sticky top-0 z-10 border-b border-gray-100">
+      <div className="flex items-center gap-1 px-4 py-3 bg-white sticky top-0 z-10 border-b border-gray-100">
         <button
           onClick={() => setDate(format(subDays(new Date(date), 1), 'yyyy-MM-dd'))}
           className="p-2 text-gray-400 active:text-gray-600"
@@ -53,9 +55,18 @@ export function DailyPage() {
         </button>
         <button
           onClick={() => setDate(format(new Date(), 'yyyy-MM-dd'))}
-          className="text-base font-semibold text-gray-800"
+          className="flex-1 text-base font-semibold text-gray-800 text-center"
         >
           {displayDate}
+        </button>
+        <button
+          onClick={() => toggleTrainingDay(date)}
+          className={`p-2 rounded-lg transition-colors ${isTraining ? 'text-orange-500 bg-orange-50' : 'text-gray-300 active:text-gray-400'}`}
+          title={isTraining ? 'トレーニングあり' : 'トレーニングなし'}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+            <path fillRule="evenodd" d="M14.615 1.595a.75.75 0 01.359.852L12.982 9.75h7.268a.75.75 0 01.548 1.262l-10.5 11.25a.75.75 0 01-1.272-.71l1.992-7.302H3.818a.75.75 0 01-.548-1.262l10.5-11.25a.75.75 0 01.845-.143z" clipRule="evenodd" />
+          </svg>
         </button>
         <button
           onClick={() => setDate(format(addDays(new Date(date), 1), 'yyyy-MM-dd'))}

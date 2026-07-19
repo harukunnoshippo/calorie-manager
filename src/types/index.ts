@@ -22,6 +22,14 @@ export interface DailyGoal {
   fat: number;
   carbs: number;
   effectiveFrom: string; // YYYY-MM-DD
+  trainingCalories?: number;
+  trainingProtein?: number;
+  trainingFat?: number;
+  trainingCarbs?: number;
+}
+
+export interface TrainingDay {
+  date: string; // YYYY-MM-DD (primary key)
 }
 
 export interface AppSettings {

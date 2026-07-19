@@ -9,9 +9,13 @@ export function SettingsPage() {
   const goal = useCurrentGoal();
   const settings = useSettings();
 
+  const [goalTab, setGoalTab] = useState<'normal' | 'training'>('normal');
   const [protein, setProtein] = useState('');
   const [fat, setFat] = useState('');
   const [carbs, setCarbs] = useState('');
+  const [trainingProtein, setTrainingProtein] = useState('');
+  const [trainingFat, setTrainingFat] = useState('');
+  const [trainingCarbs, setTrainingCarbs] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [saved, setSaved] = useState(false);
   const [goalLoaded, setGoalLoaded] = useState(false);
@@ -19,19 +23,17 @@ export function SettingsPage() {
   const [importMsg, setImportMsg] = useState<string | null>(null);
   const overdue = isBackupOverdue();
 
-  const calories = calculateCalories(
-    Number(protein) || 0,
-    Number(fat) || 0,
-    Number(carbs) || 0,
-  );
+  const calories = calculateCalories(Number(protein) || 0, Number(fat) || 0, Number(carbs) || 0);
+  const trainingCalories = calculateCalories(Number(trainingProtein) || 0, Number(trainingFat) || 0, Number(trainingCarbs) || 0);
 
-  // goal is undefined while DB is loading, then either a DailyGoal or undefined (no saved goal)
-  // useLiveQuery returns undefined during loading, then the actual result
   useEffect(() => {
     if (!goalLoaded && goal !== undefined) {
       setProtein(String(goal.protein));
       setFat(String(goal.fat));
       setCarbs(String(goal.carbs));
+      setTrainingProtein(goal.trainingProtein != null ? String(goal.trainingProtein) : '');
+      setTrainingFat(goal.trainingFat != null ? String(goal.trainingFat) : '');
+      setTrainingCarbs(goal.trainingCarbs != null ? String(goal.trainingCarbs) : '');
       setGoalLoaded(true);
     }
   }, [goal, goalLoaded]);
@@ -41,11 +43,20 @@ export function SettingsPage() {
   }, [settings]);
 
   const handleSaveGoal = async () => {
+    const tp = trainingProtein !== '' ? Number(trainingProtein) : undefined;
+    const tf = trainingFat !== '' ? Number(trainingFat) : undefined;
+    const tc = trainingCarbs !== '' ? Number(trainingCarbs) : undefined;
     await saveGoal({
       calories,
       protein: Number(protein) || 0,
       fat: Number(fat) || 0,
       carbs: Number(carbs) || 0,
+      trainingProtein: tp,
+      trainingFat: tf,
+      trainingCarbs: tc,
+      trainingCalories: tp != null && tf != null && tc != null
+        ? calculateCalories(tp, tf, tc)
+        : undefined,
       effectiveFrom: format(new Date(), 'yyyy-MM-dd'),
     });
     setSaved(true);
@@ -100,48 +111,82 @@ export function SettingsPage() {
         <div className="bg-white rounded-2xl p-5 shadow-sm space-y-4">
           <h3 className="text-sm font-bold text-gray-700">1日の目標</h3>
 
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-blue-500 mb-1">P (g)</label>
-              <input
-                type="number"
-                inputMode="decimal"
-                value={protein}
-                onChange={(e) => setProtein(e.target.value)}
-                placeholder="60"
-                className="w-full px-3 py-2.5 bg-gray-50 border border-blue-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-300"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-amber-500 mb-1">F (g)</label>
-              <input
-                type="number"
-                inputMode="decimal"
-                value={fat}
-                onChange={(e) => setFat(e.target.value)}
-                placeholder="55"
-                className="w-full px-3 py-2.5 bg-gray-50 border border-amber-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-amber-300"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-green-500 mb-1">C (g)</label>
-              <input
-                type="number"
-                inputMode="decimal"
-                value={carbs}
-                onChange={(e) => setCarbs(e.target.value)}
-                placeholder="300"
-                className="w-full px-3 py-2.5 bg-gray-50 border border-green-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-green-300"
-              />
-            </div>
+          {/* Tab switcher */}
+          <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
+            <button
+              onClick={() => setGoalTab('normal')}
+              className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${
+                goalTab === 'normal' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500'
+              }`}
+            >
+              通常日
+            </button>
+            <button
+              onClick={() => setGoalTab('training')}
+              className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${
+                goalTab === 'training' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500'
+              }`}
+            >
+              トレーニング日
+            </button>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-indigo-500 mb-1">カロリー (kcal) — PFCから自動計算</label>
-            <div className="w-full px-3 py-2.5 bg-indigo-50 border border-indigo-200 rounded-xl text-sm text-center font-semibold text-indigo-700">
-              {calories} kcal
-            </div>
-          </div>
+          {goalTab === 'normal' ? (
+            <>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-blue-500 mb-1">P (g)</label>
+                  <input type="number" inputMode="decimal" value={protein} onChange={(e) => setProtein(e.target.value)} placeholder="60"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-blue-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-amber-500 mb-1">F (g)</label>
+                  <input type="number" inputMode="decimal" value={fat} onChange={(e) => setFat(e.target.value)} placeholder="55"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-amber-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-amber-300" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-green-500 mb-1">C (g)</label>
+                  <input type="number" inputMode="decimal" value={carbs} onChange={(e) => setCarbs(e.target.value)} placeholder="300"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-green-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-green-300" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-indigo-500 mb-1">カロリー (kcal) — PFCから自動計算</label>
+                <div className="w-full px-3 py-2.5 bg-indigo-50 border border-indigo-200 rounded-xl text-sm text-center font-semibold text-indigo-700">
+                  {calories} kcal
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-xs text-gray-400">
+                ホーム画面の⚡ボタンでトレーニングありにした日に適用されます。
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-blue-500 mb-1">P (g)</label>
+                  <input type="number" inputMode="decimal" value={trainingProtein} onChange={(e) => setTrainingProtein(e.target.value)} placeholder="120"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-blue-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-amber-500 mb-1">F (g)</label>
+                  <input type="number" inputMode="decimal" value={trainingFat} onChange={(e) => setTrainingFat(e.target.value)} placeholder="30"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-amber-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-amber-300" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-green-500 mb-1">C (g)</label>
+                  <input type="number" inputMode="decimal" value={trainingCarbs} onChange={(e) => setTrainingCarbs(e.target.value)} placeholder="255"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-green-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-green-300" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-orange-500 mb-1">カロリー (kcal) — PFCから自動計算</label>
+                <div className="w-full px-3 py-2.5 bg-orange-50 border border-orange-200 rounded-xl text-sm text-center font-semibold text-orange-600">
+                  {trainingCalories} kcal
+                </div>
+              </div>
+            </>
+          )}
 
           <button
             onClick={handleSaveGoal}
